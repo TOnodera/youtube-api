@@ -1,0 +1,44 @@
+.header{
+    grid-area: header;
+}
+.sidebar{
+    grid-area: sidebar;
+}
+.main{
+    grid-area: main;
+    min-height: 80vh;
+}
+.footer{
+    grid-area: footer;
+}
+
+// SP
+.app{
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 8fr 1fr;
+    grid-template-areas: 
+    "header"
+    "main"
+    "footer";
+    .sidebar{
+        display: none;
+    }
+}
+
+// PC
+@media (min-width: 769px) {
+    .app{
+        display: grid;
+        grid-template-columns: 1fr 9fr;
+        grid-template-rows: 1fr 8fr 1fr;
+        grid-template-areas: 
+        "header header"
+        "sidebar main"
+        "footer footer";
+        .sidebar{
+            display: block;
+        }
+    }
+}
+
