@@ -21,7 +21,7 @@
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
-			"extensions": ["rust-lang.rust-analyzer", "mhutchie.git-graph", "vadimcn.vscode-lldb"],
+			"extensions": ["rust-lang.rust-analyzer", "mhutchie.git-graph", "vadimcn.vscode-lldb", "github.copilot"],
 			"settings": {
 				"[rust]": {
 					"editor.formatOnSave": true,
