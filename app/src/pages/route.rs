@@ -1,3 +1,4 @@
+use actix_files::{self as fs};
 use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 
 use super::callback::callback;
@@ -11,4 +12,6 @@ pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(web::resource("/oauth").route(web::get().to(oauth)));
     // callbackページ（oauth認証後にリダイレクトされるページ）
     cfg.service(web::resource("/callback").route(web::get().to(callback)));
+    // staticファイル
+    cfg.service(fs::Files::new("/", "./frontend/build").show_files_listing());
 }
