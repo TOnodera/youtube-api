@@ -37,6 +37,7 @@ pub async fn oauth(_: HttpRequest) -> Result<Redirect> {
         "https://accounts.google.com/o/oauth2/v2/auth?redirect_uri={}&client_id={}&response_type={}&scope={}&access_type={}&state={}",
         redirect_uri, client_id, response_type, scope, access_type, state
     );
+    println!("url: {}", url);
 
     Ok(Redirect::to(url).permanent())
 }

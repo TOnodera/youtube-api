@@ -21,11 +21,19 @@
 	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
-			"extensions": ["rust-lang.rust-analyzer", "mhutchie.git-graph", "vadimcn.vscode-lldb", "github.copilot"],
+			"extensions": ["rust-lang.rust-analyzer", "mhutchie.git-graph", "vadimcn.vscode-lldb", "github.copilot", "esbenp.prettier-vscode"],
 			"settings": {
 				"[rust]": {
 					"editor.formatOnSave": true,
 					"editor.defaultFormatter": "rust-lang.rust-analyzer"
+				},
+				"[typescript]": {
+					"editor.formatOnSave": true,
+					"editor.defaultFormatter": "esbenp.prettier-vscode"
+				},
+				"[typescriptreact]": {
+					"editor.formatOnSave": true,
+					"editor.defaultFormatter": "esbenp.prettier-vscode"
 				}
 			}
 		}
