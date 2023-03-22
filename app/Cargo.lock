@@ -304,11 +304,13 @@ dependencies = [
  "actix-files",
  "actix-web",
  "cargo-watch",
+ "derive_more",
  "dotenv",
  "openssl",
  "percent-encoding",
  "regex",
  "reqwest",
+ "serde",
 ]
 
 [[package]]

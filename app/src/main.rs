@@ -3,8 +3,10 @@ use actix_web::{App, HttpServer};
 use openssl::ssl::{SslAcceptor, SslFiletype, SslMethod};
 
 mod env;
+mod error;
 mod pages;
 mod types;
+mod util;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

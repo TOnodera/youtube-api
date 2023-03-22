@@ -1,12 +1,20 @@
 use std::collections::HashMap;
 
-use actix_web::{HttpRequest, HttpResponse, Result};
+use actix_web::{
+    web::{self, Json},
+    HttpRequest,
+};
 use percent_encoding::percent_decode_str;
 use regex::Regex;
+use reqwest::StatusCode;
 
-use crate::env;
+use crate::{
+    env,
+    error::AppError,
+    types::{AccessToken, AppResult, Success},
+};
 
-pub async fn callback(request: HttpRequest) -> Result<HttpResponse> {
+pub async fn callback(request: HttpRequest) -> AppResult<Json<Success<AccessToken>>> {
     // TODO actix-webのqueryの機能を使って取得できるように変更する
 
     // CODEからアクセストークンを取得する
@@ -14,10 +22,20 @@ pub async fn callback(request: HttpRequest) -> Result<HttpResponse> {
     let url = "https://oauth2.googleapis.com/token";
 
     // CLIENT_ID
-    let client_id = env::get_env("YOUTUBE_API_CLIENT_ID")?;
+    let client_id = match env::get_env("YOUTUBE_API_CLIENT_ID") {
+        Ok(client_id) => client_id,
+        Err(e) => {
+            return Err(AppError::InternalError);
+        }
+    };
 
     // CLIENT_SECRET
-    let client_secret = env::get_env("YOUTUBE_API_CLIENT_SECRET")?;
+    let client_secret = match env::get_env("YOUTUBE_API_CLIENT_SECRET") {
+        Ok(client_secret) => client_secret,
+        Err(e) => {
+            return Err(AppError::InternalError);
+        }
+    };
 
     // CODE
     let re = Regex::new(r"code=(?P<code>.*)&").unwrap();
@@ -27,13 +45,13 @@ pub async fn callback(request: HttpRequest) -> Result<HttpResponse> {
             let code = match caps.name("code") {
                 Some(code) => code.as_str().to_string(),
                 None => {
-                    return Ok(HttpResponse::Ok().body("code not found"));
+                    return Err(AppError::InternalError);
                 }
             };
             code.to_string()
         }
         None => {
-            return Ok(HttpResponse::Ok().body("code not found"));
+            return Err(AppError::InternalError);
         }
     };
 
@@ -62,14 +80,19 @@ pub async fn callback(request: HttpRequest) -> Result<HttpResponse> {
     let response = match result {
         Ok(response) => response,
         Err(e) => {
-            return Ok(HttpResponse::Ok().body(format!("error: {}", e)));
+            return Err(AppError::InternalError);
         }
     };
-    let text = match response.text().await {
-        Ok(text) => text,
+
+    let access_token = match response.json::<AccessToken>().await {
+        Ok(access_token) => access_token,
         Err(e) => {
-            return Ok(HttpResponse::Ok().body(format!("error: {}", e)));
+            return Err(AppError::InternalError);
         }
     };
-    Ok(HttpResponse::Ok().body(text))
+
+    Ok(web::Json(Success::new(
+        StatusCode::OK.as_u16(),
+        access_token,
+    )))
 }
