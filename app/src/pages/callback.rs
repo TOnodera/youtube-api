@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use actix_web::{
     web::{self, Json},
-    HttpRequest,
+    HttpRequest, HttpResponse,
 };
 use percent_encoding::percent_decode_str;
 use regex::Regex;
@@ -87,6 +87,7 @@ pub async fn callback(request: HttpRequest) -> AppResult<Json<Success<AccessToke
     let access_token = match response.json::<AccessToken>().await {
         Ok(access_token) => access_token,
         Err(e) => {
+            println!("{:?}", e);
             return Err(AppError::InternalError);
         }
     };
