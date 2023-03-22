@@ -1,43 +1,19 @@
-use std::collections::HashMap;
-
-use actix_web::{
-    web::{self, Json},
-    HttpRequest, HttpResponse,
-};
-use percent_encoding::percent_decode_str;
-use regex::Regex;
-use reqwest::StatusCode;
-
 use crate::{
     env,
     error::AppError,
     types::{AccessToken, AppResult, Success},
+    util::{get_client_id, get_client_secret, get_redirect_uri},
 };
+use actix_web::{
+    web::{self, Json},
+    HttpRequest,
+};
+use percent_encoding::percent_decode_str;
+use regex::Regex;
+use reqwest::StatusCode;
+use std::collections::HashMap;
 
-pub async fn callback(request: HttpRequest) -> AppResult<Json<Success<AccessToken>>> {
-    // TODO actix-webのqueryの機能を使って取得できるように変更する
-
-    // CODEからアクセストークンを取得する
-    // トークンエンドポイント
-    let url = "https://oauth2.googleapis.com/token";
-
-    // CLIENT_ID
-    let client_id = match env::get_env("YOUTUBE_API_CLIENT_ID") {
-        Ok(client_id) => client_id,
-        Err(e) => {
-            return Err(AppError::InternalError);
-        }
-    };
-
-    // CLIENT_SECRET
-    let client_secret = match env::get_env("YOUTUBE_API_CLIENT_SECRET") {
-        Ok(client_secret) => client_secret,
-        Err(e) => {
-            return Err(AppError::InternalError);
-        }
-    };
-
-    // CODE
+async fn parse_oauth_code(request: HttpRequest) -> AppResult<String> {
     let re = Regex::new(r"code=(?P<code>.*)&").unwrap();
     let caps = re.captures(request.query_string());
     let code = match caps {
@@ -54,9 +30,27 @@ pub async fn callback(request: HttpRequest) -> AppResult<Json<Success<AccessToke
             return Err(AppError::InternalError);
         }
     };
+    Ok(code)
+}
+
+pub async fn callback(request: HttpRequest) -> AppResult<Json<Success<AccessToken>>> {
+    // TODO actix-webのqueryの機能を使って取得できるように変更する
+
+    // CODEからアクセストークンを取得する
+    // トークンエンドポイント
+    let url = "https://oauth2.googleapis.com/token";
+
+    // CLIENT_ID
+    let client_id = get_client_id().await?;
+
+    // CLIENT_SECRET
+    let client_secret = get_client_secret().await?;
+
+    // CODE
+    let code = parse_oauth_code(request).await?;
 
     // REDIRECT_URI
-    let redirect_uri = env::get_env("YOUTUBE_API_REDIRECT_URI")?;
+    let redirect_uri = get_redirect_uri().await?;
 
     // トークンエンドポイントに投げるパラメータを生成
     let mut params = HashMap::new();

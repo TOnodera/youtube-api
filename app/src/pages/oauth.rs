@@ -1,25 +1,15 @@
-use actix_web::{web::Redirect, HttpRequest, Result};
+use crate::{
+    types::AppResult,
+    util::{get_client_id, get_redirect_uri},
+};
+use actix_web::{web::Redirect, HttpRequest};
 
-use crate::env;
-
-pub async fn oauth(_: HttpRequest) -> Result<Redirect> {
+pub async fn oauth(_: HttpRequest) -> AppResult<Redirect> {
     // URL
-    let redirect_uri_env = env::get_env("YOUTUBE_API_REDIRECT_URI");
-    let redirect_uri = match redirect_uri_env {
-        Ok(redirect_uri) => redirect_uri,
-        Err(e) => {
-            return Err(e.into());
-        }
-    };
+    let redirect_uri = get_redirect_uri().await?;
 
     // CLIENT_ID
-    let client_id_env = env::get_env("YOUTUBE_API_CLIENT_ID");
-    let client_id = match client_id_env {
-        Ok(client_id) => client_id,
-        Err(e) => {
-            return Err(e.into());
-        }
-    };
+    let client_id = get_client_id().await?;
 
     // RESPONSE_TYPE
     let response_type = "code";
